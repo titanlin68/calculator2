@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>折扣定價計算器</title>
+    <style>
+        body { 
+            font-family: "Microsoft JhengHei", sans-serif; 
+            background-color: #f8f9fa; 
+            margin: 0; 
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            flex-wrap: wrap;
+        }
+
+        .card { 
+            flex: 1;
+            min-width: 340px;
+            background: white; 
+            padding: 30px; 
+            border-radius: 4px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        .venue-label { 
+            color: #d9534f; 
+            text-align: center; 
+            font-weight: bold; 
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1rem; 
+        }
+
+        .main-header { 
+            text-align: center; 
+            font-size: 1.3rem; 
+            font-weight: bold; 
+            margin-bottom: 25px; 
+            color: #333; 
+        }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+
+        .mode-hint {
+            display: block;
+            text-align: center;
+            background: #e9ecef;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            color: #495057;
+        }
+
+        .result-box { 
+            margin-top: 25px; 
+            padding: 20px; 
+            background-color: #fff3cd; 
+            border-left: 5px solid #ffc107; 
+            border-radius: 4px;
+        }
+
+        .result-box.no-round {
+            background-color: #e7f3ff;
+            border-left: 5px solid #007bff;
+        }
+
+        .result-box.no-round label { color: #004085; }
+
+        .result-box input { 
+            background-color: #f1f3f5; 
+            border: 1px solid #ced4da; 
+            color: #333; 
+            font-weight: bold; 
+            font-size: 1.2rem;
+        }
+
+        .hint { font-size: 0.8rem; color: #777; margin-top: 5px; }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; align-items: center; }
+            .card { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card" id="venueA">
+        <span class="venue-label">場地A</span>
+        <div class="main-header">折扣定價計算器</div>
+        <div class="mode-hint">公式：原價 × 折扣% = 定價</div>
+        
+        <div class="input-group">
+            <label>時段</label>
+            <input type="text" placeholder="例如：平日">
+        </div>
+
+        <div class="input-group">
+            <label>原價</label>
+            <input type="number" class="val1" placeholder="輸入金額" oninput="calculateA()">
+        </div>
+
+        <div class="input-group">
+            <label>折扣 (%)</label>
+            <input type="number" class="val2" placeholder="例如：15" oninput="calculateA()">
+        </div>
+
+        <div class="result-box">
+            <label>最終定價 (特殊進位後)</label>
+            <input type="text" class="total" readonly>
+            <div class="hint">規則：1-4➔5, 6-9➔10</div>
+        </div>
+    </div>
+
+    <div class="card" id="venueB">
+        <span class="venue-label">場地B</span>
+        <div class="main-header">反推原價計算器</div>
+        <div class="mode-hint">公式：售價 ÷ 折扣% = 原價</div>
+        
+        <div class="input-group">
+            <label>時段</label>
+            <input type="text" placeholder="例如：假日">
+        </div>
+
+        <div class="input-group">
+            <label>定價 (目標金額)</label>
+            <input type="number" class="val1" placeholder="輸入金額" oninput="calculateB()">
+        </div>
+
+        <div class="input-group">
+            <label>折扣 (%)</label>
+            <input type="number" class="val2" placeholder="例如：15" oninput="calculateB()">
+        </div>
+
+        <div class="result-box no-round">
+            <label>反推原價 (精確值)</label>
+            <input type="text" class="total" readonly>
+            <div class="hint">註：此處不進行特殊進位</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 場地A 特殊進位邏輯
+    function specialRounding(num) {
+        let rounded = Math.floor(num);
+        let lastDigit = rounded % 10;
+        let baseTen = Math.floor(rounded / 10) * 10;
+        
+        if (lastDigit >= 1 && lastDigit <= 4) return baseTen + 5;
+        if (lastDigit >= 6 && lastDigit <= 9) return baseTen + 10;
+        return rounded;
+    }
+
+    function calculateA() {
+        const card = document.getElementById('venueA');
+        const v1 = parseFloat(card.querySelector('.val1').value);
+        const v2 = parseFloat(card.querySelector('.val2').value);
+        const totalInput = card.querySelector('.total');
+
+        if (isNaN(v1) || isNaN(v2)) {
+            totalInput.value = "";
+            return;
+        }
+
+        let raw = v1 * (v2 / 100);
+        totalInput.value = specialRounding(raw).toLocaleString();
+    }
+
+    // 場地B 計算邏輯 (直接顯示，不進位)
+    function calculateB() {
+        const card = document.getElementById('venueB');
+        const v1 = parseFloat(card.querySelector('.val1').value);
+        const v2 = parseFloat(card.querySelector('.val2').value);
+        const totalInput = card.querySelector('.total');
+
+        if (isNaN(v1) || isNaN(v2) || v2 === 0) {
+            totalInput.value = "";
+            return;
+        }
+
+        let raw = v1 / (v2 / 100);
+        
+        // 保留到整數位，若有小數則呈現（例如 100.5）
+        // 這裡使用四捨五入到小數第二位，或是 Math.round 取整數皆可
+        // 目前設定為直接顯示四捨五入後的整數值
+        totalInput.value = Math.round(raw).toLocaleString();
+    }
+</script>
+
+</body>
+</html>
