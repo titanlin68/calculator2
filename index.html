@@ -3,24 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>反推原價計算器</title>
+    <title>反推原價計算器 - 三場地橫向版</title>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f8f9fa; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { display: flex; gap: 15px; width: 100%; max-width: 1100px; flex-wrap: wrap; justify-content: center; }
-        .card { flex: 1; min-width: 320px; background: white; padding: 25px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; display: flex; flex-direction: column; }
+        /* 基本背景設定 */
+        body { 
+            font-family: "Microsoft JhengHei", sans-serif; 
+            background-color: #f8f9fa; 
+            margin: 0; 
+            padding: 40px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+
+        /* 核心容器：設定為橫向排列 */
+        .container { 
+            display: flex; 
+            flex-direction: row; /* 強制橫向排列 */
+            gap: 15px; 
+            width: 100%; 
+            max-width: 1200px; 
+            justify-content: center; /* 居中對齊 */
+            align-items: stretch; /* 高度一致 */
+        }
+
+        /* 計算器卡片設定 */
+        .card { 
+            flex: 1; /* 讓三張卡片平分寬度 */
+            min-width: 0; /* 防止內容撐開卡片 */
+            background: white; 
+            padding: 25px; 
+            border-radius: 4px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            border: 1px solid #e0e0e0; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        /* 標題與文字樣式 */
         .venue-label { color: #d9534f; text-align: center; font-weight: bold; display: block; margin-bottom: 5px; font-size: 1.1rem; }
         .main-header { text-align: center; font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; color: #333; }
         .formula-hint { text-align: center; background: #e9ecef; padding: 5px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 20px; color: #495057; }
+        
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; font-size: 0.95rem; }
         input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; color: #555; }
         
-        .result-box { margin-top: auto; padding: 15px 20px; background-color: #e7f3ff; border-left: 5px solid #007bff; border-radius: 4px; }
+        /* 藍色結果區塊樣式 */
+        .result-box { 
+            margin-top: auto; 
+            padding: 15px 20px; 
+            background-color: #e7f3ff; 
+            border-left: 5px solid #007bff; 
+            border-radius: 4px; 
+        }
         .result-box label { color: #004085; font-weight: bold; margin-bottom: 10px; display: block; }
         .result-box input { background-color: #f1f3f5; border: 1px solid #ced4da; color: #333; font-weight: bold; font-size: 1.2rem; }
         .hint { font-size: 0.75rem; color: #888; margin-top: 5px; }
 
-        @media (max-width: 768px) { .card { min-width: 100%; } }
+        /* 手機版自動改為垂直排列 */
+        @media (max-width: 900px) {
+            .container { flex-direction: column; align-items: center; }
+            .card { width: 100%; min-width: 320px; }
+        }
     </style>
 </head>
 <body>
@@ -35,7 +80,7 @@
         <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：15" oninput="doRev('revA')"></div>
         <div class="result-box">
             <label>反推原價 (精確值)</label>
-            <input type="text" class="total" readonly>
+            <input type="text" class="total" readonly placeholder="顯示金額">
             <div class="hint">註：此處不進行特殊進位</div>
         </div>
     </div>
@@ -49,7 +94,7 @@
         <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：20" oninput="doRev('revB')"></div>
         <div class="result-box">
             <label>反推原價 (精確值)</label>
-            <input type="text" class="total" readonly>
+            <input type="text" class="total" readonly placeholder="顯示金額">
             <div class="hint">註：此處不進行特殊進位</div>
         </div>
     </div>
@@ -63,7 +108,7 @@
         <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：25" oninput="doRev('revC')"></div>
         <div class="result-box">
             <label>反推原價 (精確值)</label>
-            <input type="text" class="total" readonly>
+            <input type="text" class="total" readonly placeholder="顯示金額">
             <div class="hint">註：此處不進行特殊進位</div>
         </div>
     </div>
@@ -81,7 +126,7 @@
             return;
         }
         
-        // 反推公式：目標金額 / (折扣率/100)
+        // 公式：售價 / (折扣/100) -> 四捨五入至整數
         let res = Math.round(t / (r / 100));
         out.value = res.toLocaleString();
     }
