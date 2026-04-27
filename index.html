@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>三場地折扣與反推計算器</title>
+    <title>反推原價計算器</title>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .section-title { margin: 30px 0 10px; font-size: 1.5rem; color: #333; border-bottom: 2px solid #ddd; width: 100%; max-width: 1200px; padding-bottom: 5px; }
-        .container { display: flex; gap: 15px; width: 100%; max-width: 1200px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f8f9fa; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { display: flex; gap: 15px; width: 100%; max-width: 1100px; flex-wrap: wrap; justify-content: center; }
         .card { flex: 1; min-width: 320px; background: white; padding: 25px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; display: flex; flex-direction: column; }
         .venue-label { color: #d9534f; text-align: center; font-weight: bold; display: block; margin-bottom: 5px; font-size: 1.1rem; }
         .main-header { text-align: center; font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; color: #333; }
@@ -15,56 +14,78 @@
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; font-size: 0.95rem; }
         input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; color: #555; }
+        
+        .result-box { margin-top: auto; padding: 15px 20px; background-color: #e7f3ff; border-left: 5px solid #007bff; border-radius: 4px; }
+        .result-box label { color: #004085; font-weight: bold; margin-bottom: 10px; display: block; }
+        .result-box input { background-color: #f1f3f5; border: 1px solid #ced4da; color: #333; font-weight: bold; font-size: 1.2rem; }
         .hint { font-size: 0.75rem; color: #888; margin-top: 5px; }
-        
-        /* 黃色區塊 - 折扣定價 (含進位) */
-        .result-box.yellow { margin-top: auto; padding: 15px 20px; background-color: #fff3cd; border-left: 5px solid #ffc107; border-radius: 4px; }
-        .result-box.yellow label { color: #856404; }
-        .result-box.yellow input { background-color: #f1f3f5; border: 1px solid #ced4da; font-weight: bold; }
-        
-        /* 藍色區塊 - 反推原價 (不進位) */
-        .result-box.blue { margin-top: auto; padding: 15px 20px; background-color: #e7f3ff; border-left: 5px solid #007bff; border-radius: 4px; }
-        .result-box.blue label { color: #004085; }
-        .result-box.blue input { background-color: #f1f3f5; border: 1px solid #ced4da; font-weight: bold; }
 
         @media (max-width: 768px) { .card { min-width: 100%; } }
     </style>
 </head>
 <body>
 
-<div class="section-title">折扣定價計算器 (含特殊進位)</div>
 <div class="container">
-    <script>
-        // 這裡會重複產生三個場地的 HTML 結構，為簡化說明，邏輯如下：
-        function calculateDiscount(id) {
-            const card = document.getElementById(id);
-            const p = parseFloat(card.querySelector('.p').value);
-            const d = parseFloat(card.querySelector('.d').value);
-            const out = card.querySelector('.out');
-            if (isNaN(p) || isNaN(d)) { out.value = ""; return; }
-            let raw = p * (d / 100);
-            let floor = Math.floor(raw);
-            let last = floor % 10;
-            let base = Math.floor(floor / 10) * 10;
-            let final = (last >= 1 && last <= 4) ? base + 5 : (last >= 6 && last <= 9) ? base + 10 : floor;
-            out.value = final.toLocaleString();
-        }
-    </script>
+    <div class="card" id="revA">
+        <span class="venue-label">場地A</span>
+        <div class="main-header">反推原價計算器</div>
+        <div class="formula-hint">公式：售價 ÷ 折扣% = 原價</div>
+        <div class="input-group"><label>時段</label><input type="text" placeholder="例如：假日"></div>
+        <div class="input-group"><label>定價 (目標金額)</label><input type="number" class="target" placeholder="輸入金額" oninput="doRev('revA')"></div>
+        <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：15" oninput="doRev('revA')"></div>
+        <div class="result-box">
+            <label>反推原價 (精確值)</label>
+            <input type="text" class="total" readonly>
+            <div class="hint">註：此處不進行特殊進位</div>
+        </div>
     </div>
 
-<div class="section-title">反推原價計算器 (精確值)</div>
-<div class="container">
-    <script>
-        function reversePrice(id) {
-            const card = document.getElementById(id);
-            const target = parseFloat(card.querySelector('.target').value);
-            const d = parseFloat(card.querySelector('.d').value);
-            const out = card.querySelector('.out');
-            if (isNaN(target) || isNaN(d) || d === 0) { out.value = ""; return; }
-            out.value = Math.round(target / (d / 100)).toLocaleString();
-        }
-    </script>
+    <div class="card" id="revB">
+        <span class="venue-label">場地B</span>
+        <div class="main-header">反推原價計算器</div>
+        <div class="formula-hint">公式：售價 ÷ 折扣% = 原價</div>
+        <div class="input-group"><label>時段</label><input type="text" placeholder="例如：假日"></div>
+        <div class="input-group"><label>定價 (目標金額)</label><input type="number" class="target" placeholder="輸入金額" oninput="doRev('revB')"></div>
+        <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：20" oninput="doRev('revB')"></div>
+        <div class="result-box">
+            <label>反推原價 (精確值)</label>
+            <input type="text" class="total" readonly>
+            <div class="hint">註：此處不進行特殊進位</div>
+        </div>
+    </div>
+
+    <div class="card" id="revC">
+        <span class="venue-label">場地C</span>
+        <div class="main-header">反推原價計算器</div>
+        <div class="formula-hint">公式：售價 ÷ 折扣% = 原價</div>
+        <div class="input-group"><label>時段</label><input type="text" placeholder="例如：假日"></div>
+        <div class="input-group"><label>定價 (目標金額)</label><input type="number" class="target" placeholder="輸入金額" oninput="doRev('revC')"></div>
+        <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：25" oninput="doRev('revC')"></div>
+        <div class="result-box">
+            <label>反推原價 (精確值)</label>
+            <input type="text" class="total" readonly>
+            <div class="hint">註：此處不進行特殊進位</div>
+        </div>
+    </div>
 </div>
+
+<script>
+    function doRev(id) {
+        const card = document.getElementById(id);
+        const t = parseFloat(card.querySelector('.target').value);
+        const r = parseFloat(card.querySelector('.rate').value);
+        const out = card.querySelector('.total');
+        
+        if (isNaN(t) || isNaN(r) || r === 0) {
+            out.value = "";
+            return;
+        }
+        
+        // 反推公式：目標金額 / (折扣率/100)
+        let res = Math.round(t / (r / 100));
+        out.value = res.toLocaleString();
+    }
+</script>
 
 </body>
 </html>
