@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>反推原價計算器 - 三場地橫向版</title>
+    <title>反推原價計算器 - 無條件進位版</title>
     <style>
-        /* 基本背景設定 */
         body { 
             font-family: "Microsoft JhengHei", sans-serif; 
             background-color: #f8f9fa; 
@@ -16,21 +15,19 @@
             align-items: center; 
         }
 
-        /* 核心容器：設定為橫向排列 */
         .container { 
             display: flex; 
-            flex-direction: row; /* 強制橫向排列 */
+            flex-direction: row; 
             gap: 15px; 
             width: 100%; 
             max-width: 1200px; 
-            justify-content: center; /* 居中對齊 */
-            align-items: stretch; /* 高度一致 */
+            justify-content: center; 
+            align-items: stretch; 
         }
 
-        /* 計算器卡片設定 */
         .card { 
-            flex: 1; /* 讓三張卡片平分寬度 */
-            min-width: 0; /* 防止內容撐開卡片 */
+            flex: 1; 
+            min-width: 0; 
             background: white; 
             padding: 25px; 
             border-radius: 4px; 
@@ -40,7 +37,6 @@
             flex-direction: column; 
         }
 
-        /* 標題與文字樣式 */
         .venue-label { color: #d9534f; text-align: center; font-weight: bold; display: block; margin-bottom: 5px; font-size: 1.1rem; }
         .main-header { text-align: center; font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; color: #333; }
         .formula-hint { text-align: center; background: #e9ecef; padding: 5px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 20px; color: #495057; }
@@ -49,7 +45,6 @@
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; font-size: 0.95rem; }
         input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 16px; color: #555; }
         
-        /* 藍色結果區塊樣式 */
         .result-box { 
             margin-top: auto; 
             padding: 15px 20px; 
@@ -61,7 +56,6 @@
         .result-box input { background-color: #f1f3f5; border: 1px solid #ced4da; color: #333; font-weight: bold; font-size: 1.2rem; }
         .hint { font-size: 0.75rem; color: #888; margin-top: 5px; }
 
-        /* 手機版自動改為垂直排列 */
         @media (max-width: 900px) {
             .container { flex-direction: column; align-items: center; }
             .card { width: 100%; min-width: 320px; }
@@ -79,9 +73,9 @@
         <div class="input-group"><label>定價 (目標金額)</label><input type="number" class="target" placeholder="輸入金額" oninput="doRev('revA')"></div>
         <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：15" oninput="doRev('revA')"></div>
         <div class="result-box">
-            <label>反推原價 (精確值)</label>
+            <label>反推原價 (無條件進位)</label>
             <input type="text" class="total" readonly placeholder="顯示金額">
-            <div class="hint">註：此處不進行特殊進位</div>
+            <div class="hint">規則：計算結果若有小數點則直接進位</div>
         </div>
     </div>
 
@@ -93,9 +87,9 @@
         <div class="input-group"><label>定價 (目標金額)</label><input type="number" class="target" placeholder="輸入金額" oninput="doRev('revB')"></div>
         <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：20" oninput="doRev('revB')"></div>
         <div class="result-box">
-            <label>反推原價 (精確值)</label>
+            <label>反推原價 (無條件進位)</label>
             <input type="text" class="total" readonly placeholder="顯示金額">
-            <div class="hint">註：此處不進行特殊進位</div>
+            <div class="hint">規則：計算結果若有小數點則直接進位</div>
         </div>
     </div>
 
@@ -107,9 +101,9 @@
         <div class="input-group"><label>定價 (目標金額)</label><input type="number" class="target" placeholder="輸入金額" oninput="doRev('revC')"></div>
         <div class="input-group"><label>折扣 (%)</label><input type="number" class="rate" placeholder="例如：25" oninput="doRev('revC')"></div>
         <div class="result-box">
-            <label>反推原價 (精確值)</label>
+            <label>反推原價 (無條件進位)</label>
             <input type="text" class="total" readonly placeholder="顯示金額">
-            <div class="hint">註：此處不進行特殊進位</div>
+            <div class="hint">規則：計算結果若有小數點則直接進位</div>
         </div>
     </div>
 </div>
@@ -126,8 +120,8 @@
             return;
         }
         
-        // 公式：售價 / (折扣/100) -> 四捨五入至整數
-        let res = Math.round(t / (r / 100));
+        // 使用 Math.ceil 確保只要有小數點就無條件進位至整數
+        let res = Math.ceil(t / (r / 100));
         out.value = res.toLocaleString();
     }
 </script>
